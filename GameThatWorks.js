@@ -1,35 +1,31 @@
 /*******************************************************/
-// Game Constants
+// 🎮 Game Constants & Variables
 /*******************************************************/
-const GAMEWIDTH = window.innerWidth;
-const GAMEHEIGHT = window.innerHeight;
-
-const PLAYERSIZE = 20;
+const PLAYERSIZE = 30;
 const PLAYERMOVEMENT = 5;
 let player;
 let score = 0;
+let fadeAlpha = 0; 
 
 const COINSIZE = 10;
-const COIN_TIMEOUT = 2000;
-const FLASH_TIME = 600; // Flash in last 600ms
+const COIN_TIMEOUT = 5000;
+const FLASH_TIME = 1000;
 let coin;
 let coinSpawnTime = 0;
 let gameState = 'start';
 
 /*******************************************************/
-// Setup Function
+// 🎭 Setup Function
 /*******************************************************/
 function setup() {
-    createCanvas(GAMEWIDTH, GAMEHEIGHT);
+    createCanvas(window.innerWidth, window.innerHeight);
     showStartScreen();
 }
 
 /*******************************************************/
-// Draw Function
+// 🎨 Draw Function
 /*******************************************************/
 function draw() {
-    background('cyan');
-
     if (gameState === 'start') {
         showStartScreen();
     } else if (gameState === 'play') {
@@ -40,80 +36,78 @@ function draw() {
 }
 
 /*******************************************************/
-// Start Screen
+// 🚀 Start Screen
 /*******************************************************/
 function showStartScreen() {
-    fill(255);
+    background('#2E2E2E');
+    fill(255, fadeAlpha);
     textSize(50);
     textAlign(CENTER, CENTER);
-    text('Coin Collector Game', GAMEWIDTH / 2, GAMEHEIGHT / 2 - 100);
-
-    fill('#32CD32');
-    rect(GAMEWIDTH / 2 - 70, GAMEHEIGHT / 2, 140, 50, 10);
-    
+    text('💰 Coin Collector', width / 2, height / 2 - 100);
+    fadeAlpha = min(fadeAlpha + 5, 255);
+    fill('#FFD700');
+    rect(width / 2 - 70, height / 2, 140, 50, 10);
     fill(0);
     textSize(22);
-    text('Start', GAMEWIDTH / 2, GAMEHEIGHT / 2 + 25);
+    text('Start', width / 2, height / 2 + 25);
 }
 
 /*******************************************************/
-// Start Game
+// 🏁 Start Game
 /*******************************************************/
 function startGame() {
     gameState = 'play';
     score = 0;
-
-    player = new Sprite(GAMEWIDTH / 2, GAMEHEIGHT / 2, PLAYERSIZE, PLAYERSIZE);
-    player.color = 'green';
-
+    fadeAlpha = 0;
+    player = new Sprite(width / 2, height / 2, PLAYERSIZE, PLAYERSIZE);
+    player.color = 'limegreen';
+    player.bounciness = 0;
     createCoin();
 }
 
 /*******************************************************/
-// Run Game Logic
+// 🎮 Game Logic
 /*******************************************************/
 function runGame() {
+    background('#1E1E1E');
     movePlayer();
     checkCoinTime();
     displayScore();
 }
 
 /*******************************************************/
-// Check Coin Expiry & Flashing
+// ⏳ Coin Expiry & Flashing
 /*******************************************************/
 function checkCoinTime() {
+    if (!coin) return;
     let timeLeft = millis() - coinSpawnTime;
     if (timeLeft > COIN_TIMEOUT - FLASH_TIME && timeLeft < COIN_TIMEOUT) {
-        coin.color = (frameCount % 10 < 5) ? 'red' : 'yellow';
+        coin.color = (frameCount % 10 < 5) ? '#FF4500' : 'yellow';
     }
     if (timeLeft > COIN_TIMEOUT) {
-        coin.remove();
         gameOver();
     }
 }
 
 /*******************************************************/
-// Create Coin
+// 💰 Create Coin
 /*******************************************************/
 function createCoin() {
-    let x = random(20, GAMEWIDTH - 20);
-    let y = random(20, GAMEHEIGHT - 20);
-
+    let x = random(20, width - 20);
+    let y = random(20, height - 20);
     coin = new Sprite(x, y, COINSIZE, COINSIZE);
-    coin.color = 'circle';
-    coin.color = 'yellow';
-
+    coin.shape = 'circle';
+    coin.color = 'gold';
     coinSpawnTime = millis();
     player.collides(coin, getPoint);
 }
 
 /*******************************************************/
-// Move Player
+// 🏃 Player Movement
 /*******************************************************/
 function movePlayer() {
     player.vel.x = 0;
     player.vel.y = 0;
-
     if (keyIsDown(65)) player.vel.x = -PLAYERMOVEMENT;
     if (keyIsDown(68)) player.vel.x = PLAYERMOVEMENT;
     if (keyIsDown(87)) player.vel.y = -PLAYERMOVEMENT;
@@ -121,61 +115,60 @@ function movePlayer() {
 }
 
 /*******************************************************/
-// Coin Collection
+// ⭐ Coin Collection
 /*******************************************************/
-function getPoint(collider1, collider2) {
-    collider2.remove();
+function getPoint(player, coin) {
+    coin.remove();
     score++;
     createCoin();
 }
 
 /*******************************************************/
-// Display Score
+// 📊 Display Score
 /*******************************************************/
 function displayScore() {
-    fill(0);
+    fill('#FFD700');
     textSize(20);
-    text("Score: " + score, 10, 20);
+    textAlign(LEFT, CENTER);
+    text("Score: " + score, 20, 30);
 }
 
 /*******************************************************/
-// Game Over Logic
+// ❌ Game Over
 /*******************************************************/
 function gameOver() {
     gameState = 'lose';
 }
 
 /*******************************************************/
-// Lose Screen
+// 💀 Lose Screen
 /*******************************************************/
 function loseScreen() {
-    background('#8B0000');
+    background('#1E1E1E');
     player.remove();
-
-    fill(255);
+    fill(255, fadeAlpha);
     textSize(40);
     textAlign(CENTER, CENTER);
-    text('Game Over!', GAMEWIDTH / 2, GAMEHEIGHT / 2 - 50);
-    text('Score: ' + score, GAMEWIDTH / 2, GAMEHEIGHT / 2);
-
-    fill('#FFFF00');
-    rect(GAMEWIDTH / 2 - 70, GAMEHEIGHT / 2 + 60, 140, 50, 10);
-    
+    text('❌ You lost the fortune!', width / 2, height / 2 - 50);
+    text('Score: ' + score, width / 2, height / 2);
+    fadeAlpha = min(fadeAlpha + 5, 255);
+    fill('#32CD32');
+    rect(width / 2 - 70, height / 2 + 60, 140, 50, 10);
     fill(0);
     textSize(22);
-    text('Restart', GAMEWIDTH / 2, GAMEHEIGHT / 2 + 85);
+    text('Restart', width / 2, height / 2 + 85);
 }
 
 /*******************************************************/
-// Mouse Click Detection
+// 🖱 Mouse Click Detection
 /*******************************************************/
 function mousePressed() {
-    if (gameState === 'start' && mouseX > GAMEWIDTH / 2 - 70 && mouseX < GAMEWIDTH / 2 + 70 &&
-        mouseY > GAMEHEIGHT / 2 && mouseY < GAMEHEIGHT / 2 + 50) {
+    if (gameState === 'start' && mouseX > width / 2 - 70 && mouseX < width / 2 + 70 &&
+        mouseY > height / 2 && mouseY < height / 2 + 50) {
         startGame();
     }
-    if (gameState === 'lose' && mouseX > GAMEWIDTH / 2 - 70 && mouseX < GAMEWIDTH / 2 + 70 &&
-        mouseY > GAMEHEIGHT / 2 + 60 && mouseY < GAMEHEIGHT / 2 + 110) {
-        location.reload();
+    if (gameState === 'lose' && mouseX > width / 2 - 70 && mouseX < width / 2 + 70 &&
+        mouseY > height / 2 + 60 && mouseY < height / 2 + 110) {
+        startGame();
     }
 }
